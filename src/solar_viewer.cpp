@@ -382,6 +382,9 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     // convert light into camera coordinates
     light = _view * light;
 
+
+
+
     static float sun_animation_time = 0;
     if (timer_active_) sun_animation_time += 0.01f;
 
@@ -397,6 +400,9 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     sun_shader_.set_uniform("greyscale", (int)greyscale_);
     sun_.tex_.bind();
     unit_sphere_.draw();
+
+
+
 
 
     /** \todo Render the star background, the spaceship, and the rest of the celestial bodies.
@@ -418,6 +424,131 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
      *
      *  Hint: See how it is done for the Sun in the code above.
      */
+
+    vec3 transVec;
+    vec3 transVecEarth;
+
+    static float earth_animation_time = 0;
+    if (timer_active_) earth_animation_time += 0.01f;
+
+    //calculate translation
+
+    transVecEarth = earth_.distance_ * vec3(sin(earth_.angle_orbit_), 0,cos(earth_.angle_orbit_));
+
+    //render earth
+    m_matrix = mat4::translate(transVecEarth) * mat4::rotate_y(earth_.angle_self_) * mat4::scale(earth_.radius_);
+    mv_matrix = _view * m_matrix;
+    mvp_matrix = _projection * mv_matrix;
+    color_shader_.use();
+    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    color_shader_.set_uniform("t", earth_animation_time, true);
+    color_shader_.set_uniform("tex", 0);
+    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    earth_.tex_.bind();
+    unit_sphere_.draw();
+
+
+    static float moon_animation_time = 0;
+    if (timer_active_) moon_animation_time += 0.01f;
+
+    //calculate translation
+
+    transVec = transVecEarth + moon_.distance_ * vec3(sin(moon_.angle_orbit_), 0, cos(moon_.angle_orbit_));
+
+    // render moon
+    m_matrix =  mat4::translate(transVec) * mat4::rotate_y(moon_.angle_self_) * mat4::scale(moon_.radius_);
+    mv_matrix = _view * m_matrix;
+    mvp_matrix = _projection * mv_matrix;
+    color_shader_.use();
+    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    color_shader_.set_uniform("t", moon_animation_time, true);
+    color_shader_.set_uniform("tex", 0);
+    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    moon_.tex_.bind();
+    unit_sphere_.draw();
+
+
+    static float mercury_animation_time = 0;
+    if (timer_active_) mercury_animation_time += 0.01f;
+
+    //calculate translation
+
+    transVec = mercury_.distance_ * vec3(sin(mercury_.angle_orbit_), 0, cos(mercury_.angle_orbit_));
+
+    // render mercury
+    m_matrix = mat4::translate(transVec) * mat4::rotate_y(mercury_.angle_self_) * mat4::scale(mercury_.radius_);
+    mv_matrix = _view * m_matrix;
+    mvp_matrix = _projection * mv_matrix;
+    color_shader_.use();
+    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    color_shader_.set_uniform("t", mercury_animation_time, true);
+    color_shader_.set_uniform("tex", 0);
+    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    mercury_.tex_.bind();
+    unit_sphere_.draw();
+
+
+    static float stars_animation_time = 0;
+    if (timer_active_) stars_animation_time += 0.01f;
+
+    //render stars
+    m_matrix = mat4::rotate_y(stars_.angle_self_) * mat4::scale(stars_.radius_);
+    mv_matrix = _view * m_matrix;
+    mvp_matrix = _projection * mv_matrix;
+    color_shader_.use();
+    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    color_shader_.set_uniform("t", stars_animation_time, true);
+    color_shader_.set_uniform("tex", 0);
+    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    stars_.tex_.bind();
+    unit_sphere_.draw();
+
+
+
+    static float venus_animation_time = 0;
+    if (timer_active_) venus_animation_time += 0.1f;
+
+    //calculate translation vector
+
+    transVec = venus_.distance_ * vec3(sin(venus_.angle_orbit_), 0, cos(venus_.angle_orbit_));
+
+    // render venus
+    m_matrix = mat4::translate(transVec) * mat4::rotate_y(venus_.angle_self_) * mat4::scale(venus_.radius_);
+    mv_matrix = _view * m_matrix;
+    mvp_matrix = _projection * mv_matrix;
+    color_shader_.use();
+    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    color_shader_.set_uniform("t", venus_animation_time, true);
+    color_shader_.set_uniform("tex", 0);
+    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    venus_.tex_.bind();
+    unit_sphere_.draw();
+
+
+    static float mars_animation_time = 0;
+    if (timer_active_) mars_animation_time += 0.01f;
+
+    //calculate translation
+
+    transVec = mars_.distance_ * vec3(sin(mars_.angle_orbit_), 0, cos(mars_.angle_orbit_));
+
+    // render mars
+    m_matrix = mat4::translate(transVec) * mat4::rotate_y(mars_.angle_self_) * mat4::scale(mars_.radius_);
+    mv_matrix = _view * m_matrix;
+    mvp_matrix = _projection * mv_matrix;
+    color_shader_.use();
+    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    color_shader_.set_uniform("t", mars_animation_time, true);
+    color_shader_.set_uniform("tex", 0);
+    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    mars_.tex_.bind();
+    unit_sphere_.draw();
+
+
+
+
+
+
 
 
     // check for OpenGL errors
