@@ -344,12 +344,7 @@ void Solar_viewer::paint()
      *  Hint: planet centers are stored in "Planet::pos_".
      */
 
-    if (in_ship_) {
-        //update eye to look down on spaceship
-
-    }
-
-#define PI 3.1415926536f
+    
     vec4     eye = vec4(0, 0, 7, 1.0);
     vec4  center = sun_.pos_;
     vec4      up = vec4(0, 1, 0, 0);
@@ -366,13 +361,19 @@ void Solar_viewer::paint()
         up = mat4::rotate_y(y_angle_) * mat4::rotate_x(x_angle_ + 90) * vec4(0, 1, 0, 0);
             
     }
+    if (in_ship_) {
+        //update eye to look down on spaceship
+        center = ship_.pos_;
+        eye = center - ship_.direction_*ship_.radius_*30 + vec4(0,0.02f,0,0);
+
+    }
     mat4 view = mat4::look_at(vec3(eye), vec3(center), vec3(up));
 
     billboard_x_angle_ = billboard_y_angle_ = 0.0f;
     
     mat4 projection = mat4::perspective(fovy_, (float)width_/(float)height_, near_, far_);
     draw_scene(projection, view);
-
+    
 
 }
 
