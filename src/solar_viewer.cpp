@@ -334,16 +334,27 @@ void Solar_viewer::paint()
      *
      *  Hint: planet centers are stored in "Planet::pos_".
      */
-
-    // For now, view the sun from a fixed position...
-    vec4     eye = vec4(0,0,7,1.0);
+#define PI 3.1415926536f
+    vec4     eye = vec4(0, 0, 7, 1.0);
     vec4  center = sun_.pos_;
-    vec4      up = vec4(0,1,0,0);
-    float radius = sun_.radius_;
-    mat4    view = mat4::look_at(vec3(eye), vec3(center), vec3(up));
+    vec4      up = vec4(0, 1, 0, 0);
+    //float radius = sun_.radius_;
+    
+    // For now, view the sun from a fixed position...
+    if (planet_to_look_at_) {
+        center = 
+            planet_to_look_at_->pos_;
+        center.w = 1;
+        
+        eye = mat4::rotate_y(y_angle_) * mat4::rotate_x(x_angle_+90) *
+            vec4(0,0,dist_factor_ * planet_to_look_at_->radius_,0)+center;
+        up = mat4::rotate_y(y_angle_) * mat4::rotate_x(x_angle_ + 90) * vec4(0, 1, 0, 0);
+            
+    }
+    mat4 view = mat4::look_at(vec3(eye), vec3(center), vec3(up));
 
     billboard_x_angle_ = billboard_y_angle_ = 0.0f;
-
+    
     mat4 projection = mat4::perspective(fovy_, (float)width_/(float)height_, near_, far_);
     draw_scene(projection, view);
 
@@ -439,6 +450,7 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(transVecEarth) * mat4::rotate_y(earth_.angle_self_) * mat4::scale(earth_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
+    earth_.pos_ = vec4(transVecEarth, 1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", earth_animation_time, true);
@@ -459,6 +471,7 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix =  mat4::translate(transVec) * mat4::rotate_y(moon_.angle_self_) * mat4::scale(moon_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
+    moon_.pos_ = vec4(transVec,1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", moon_animation_time, true);
@@ -479,6 +492,7 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(transVec) * mat4::rotate_y(mercury_.angle_self_) * mat4::scale(mercury_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
+    mercury_.pos_ = vec4(transVec, 1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", mercury_animation_time, true);
@@ -516,6 +530,7 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(transVec) * mat4::rotate_y(venus_.angle_self_) * mat4::scale(venus_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
+    venus_.pos_ = vec4(transVec, 1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", venus_animation_time, true);
@@ -536,6 +551,7 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(transVec) * mat4::rotate_y(mars_.angle_self_) * mat4::scale(mars_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
+    mars_.pos_ = vec4(transVec, 1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", mars_animation_time, true);
