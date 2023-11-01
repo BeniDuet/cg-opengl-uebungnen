@@ -208,6 +208,15 @@ void Solar_viewer::update_body_positions() {
     *       and earth's moon. Do not explicitly place the space ship, its position
     *       is fixed for now.
     * */
+
+    earth_.pos_ = earth_.distance_ * vec4(sin(earth_.angle_orbit_), 0, cos(earth_.angle_orbit_), 1);
+    moon_.pos_ = earth_.pos_ + moon_.distance_ * vec4(sin(moon_.angle_orbit_), 0, cos(moon_.angle_orbit_), 1);
+    mercury_.pos_ = mercury_.distance_ * vec4(sin(mercury_.angle_orbit_), 0, cos(mercury_.angle_orbit_), 1);
+    venus_.pos_ = venus_.distance_ * vec4(sin(venus_.angle_orbit_), 0, cos(venus_.angle_orbit_), 1);
+    mars_.pos_ = mars_.distance_ * vec4(sin(mars_.angle_orbit_), 0, cos(mars_.angle_orbit_), 1);
+
+
+    
 }
 
 //-----------------------------------------------------------------------------
@@ -334,6 +343,12 @@ void Solar_viewer::paint()
      *
      *  Hint: planet centers are stored in "Planet::pos_".
      */
+
+    if (in_ship_) {
+        //update eye to look down on spaceship
+
+    }
+
 #define PI 3.1415926536f
     vec4     eye = vec4(0, 0, 7, 1.0);
     vec4  center = sun_.pos_;
@@ -357,6 +372,7 @@ void Solar_viewer::paint()
     
     mat4 projection = mat4::perspective(fovy_, (float)width_/(float)height_, near_, far_);
     draw_scene(projection, view);
+
 
 }
 
@@ -442,12 +458,10 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     static float earth_animation_time = 0;
     if (timer_active_) earth_animation_time += 0.01f;
 
-    //calculate translation
 
-    transVecEarth = earth_.distance_ * vec3(sin(earth_.angle_orbit_), 0,cos(earth_.angle_orbit_));
 
     //render earth
-    m_matrix = mat4::translate(transVecEarth) * mat4::rotate_y(earth_.angle_self_) * mat4::scale(earth_.radius_);
+    m_matrix = mat4::translate(earth_.pos_) * mat4::rotate_y(earth_.angle_self_) * mat4::scale(earth_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
     earth_.pos_ = vec4(transVecEarth, 1);
@@ -463,12 +477,9 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     static float moon_animation_time = 0;
     if (timer_active_) moon_animation_time += 0.01f;
 
-    //calculate translation
-
-    transVec = transVecEarth + moon_.distance_ * vec3(sin(moon_.angle_orbit_), 0, cos(moon_.angle_orbit_));
 
     // render moon
-    m_matrix =  mat4::translate(transVec) * mat4::rotate_y(moon_.angle_self_) * mat4::scale(moon_.radius_);
+    m_matrix =  mat4::translate(moon_.pos_) * mat4::rotate_y(moon_.angle_self_) * mat4::scale(moon_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
     moon_.pos_ = vec4(transVec,1);
@@ -484,12 +495,9 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     static float mercury_animation_time = 0;
     if (timer_active_) mercury_animation_time += 0.01f;
 
-    //calculate translation
-
-    transVec = mercury_.distance_ * vec3(sin(mercury_.angle_orbit_), 0, cos(mercury_.angle_orbit_));
 
     // render mercury
-    m_matrix = mat4::translate(transVec) * mat4::rotate_y(mercury_.angle_self_) * mat4::scale(mercury_.radius_);
+    m_matrix = mat4::translate(mercury_.pos_) * mat4::rotate_y(mercury_.angle_self_) * mat4::scale(mercury_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
     mercury_.pos_ = vec4(transVec, 1);
@@ -522,12 +530,8 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     static float venus_animation_time = 0;
     if (timer_active_) venus_animation_time += 0.1f;
 
-    //calculate translation vector
-
-    transVec = venus_.distance_ * vec3(sin(venus_.angle_orbit_), 0, cos(venus_.angle_orbit_));
-
     // render venus
-    m_matrix = mat4::translate(transVec) * mat4::rotate_y(venus_.angle_self_) * mat4::scale(venus_.radius_);
+    m_matrix = mat4::translate(venus_.pos_) * mat4::rotate_y(venus_.angle_self_) * mat4::scale(venus_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
     venus_.pos_ = vec4(transVec, 1);
@@ -543,12 +547,9 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     static float mars_animation_time = 0;
     if (timer_active_) mars_animation_time += 0.01f;
 
-    //calculate translation
-
-    transVec = mars_.distance_ * vec3(sin(mars_.angle_orbit_), 0, cos(mars_.angle_orbit_));
 
     // render mars
-    m_matrix = mat4::translate(transVec) * mat4::rotate_y(mars_.angle_self_) * mat4::scale(mars_.radius_);
+    m_matrix = mat4::translate(mars_.pos_) * mat4::rotate_y(mars_.angle_self_) * mat4::scale(mars_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
     mars_.pos_ = vec4(transVec, 1);
@@ -560,6 +561,21 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     mars_.tex_.bind();
     unit_sphere_.draw();
 
+
+    static float ship_animation_time = 0;
+    if (timer_active_) ship_animation_time += 0.01f;
+    
+    // render ship
+    m_matrix = mat4::translate(ship_.pos_) * mat4::rotate_y(ship_.angle_) * mat4::scale(ship_.radius_);
+    mv_matrix = _view * m_matrix;
+    mvp_matrix = _projection * mv_matrix;
+    color_shader_.use();
+    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    color_shader_.set_uniform("t", ship_animation_time, true);
+    color_shader_.set_uniform("tex", 0);
+    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    ship_.tex_.bind();
+    ship_.draw();
 
 
 
