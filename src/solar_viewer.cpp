@@ -92,6 +92,12 @@ keyboard(int key, int scancode, int action, int mods)
             *    - key 9 should increase and key 8 should decrease the `dist_factor_`
             *    - 2.5 < `dist_factor_` < 20.0
             */
+            case GLFW_KEY_8:
+                dist_factor_ = std::max(2.5f, dist_factor_ - 0.5f);
+                break;
+            case GLFW_KEY_9:
+                dist_factor_ = std::min(20.f, dist_factor_ + 0.5f);
+                break;
 
             case GLFW_KEY_R:
             {
