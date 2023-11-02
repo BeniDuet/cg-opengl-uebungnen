@@ -88,10 +88,7 @@ keyboard(int key, int scancode, int action, int mods)
                 break;
             }
 
-            /** \todo Implement the ability to change the viewer's distance to the celestial body.
-            *    - key 9 should increase and key 8 should decrease the `dist_factor_`
-            *    - 2.5 < `dist_factor_` < 20.0
-            */
+            
             case GLFW_KEY_8:
                 dist_factor_ = std::max(2.5f, dist_factor_ - 0.5f);
                 break;
@@ -201,25 +198,13 @@ keyboard(int key, int scancode, int action, int mods)
     }
 }
 
-// Update the current positions of the celestial bodies based their angular distance
-// around their orbits. This position is needed to set up the camera in the scene
-// (see Solar_viewer::paint)
 void Solar_viewer::update_body_positions() {
-    /** \todo Update the position of the planets based on their distance to their orbit's center
-    * and their angular displacement around the orbit. Planets should follow a circular
-    * orbit in the x-z plane, moving in a clockwise direction around the
-    * positive y axis. "angle_orbit_ = 0" should correspond to a position on the x axis.
-    * Note: planets will orbit around the sun, which is always positioned at the origin,
-    *       but the moon orbits around the earth! Only visualize mercury, venus, earth, mars,
-    *       and earth's moon. Do not explicitly place the space ship, its position
-    *       is fixed for now.
-    * */
 
-    earth_.pos_ = earth_.distance_ * vec4(sin(earth_.angle_orbit_), 0, cos(earth_.angle_orbit_), 1);
-    moon_.pos_ = earth_.pos_ + moon_.distance_ * vec4(sin(moon_.angle_orbit_), 0, cos(moon_.angle_orbit_), 1);
-    mercury_.pos_ = mercury_.distance_ * vec4(sin(mercury_.angle_orbit_), 0, cos(mercury_.angle_orbit_), 1);
-    venus_.pos_ = venus_.distance_ * vec4(sin(venus_.angle_orbit_), 0, cos(venus_.angle_orbit_), 1);
-    mars_.pos_ = mars_.distance_ * vec4(sin(mars_.angle_orbit_), 0, cos(mars_.angle_orbit_), 1);
+    earth_.pos_ = earth_.distance_ * vec4(sin(-earth_.angle_orbit_), 0, cos(-earth_.angle_orbit_), 1);
+    moon_.pos_ = earth_.pos_ + moon_.distance_ * vec4(sin(-moon_.angle_orbit_), 0, cos(-moon_.angle_orbit_), 1);
+    mercury_.pos_ = mercury_.distance_ * vec4(sin(-mercury_.angle_orbit_), 0, cos(-mercury_.angle_orbit_), 1);
+    venus_.pos_ = venus_.distance_ * vec4(sin(-venus_.angle_orbit_), 0, cos(-venus_.angle_orbit_), 1);
+    mars_.pos_ = mars_.distance_ * vec4(sin(-mars_.angle_orbit_), 0, cos(-mars_.angle_orbit_), 1);
 
 
     
@@ -332,31 +317,13 @@ void Solar_viewer::paint()
     // clear framebuffer and depth buffer first
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    /** \todo Implement navigation through the solar system.
-     *   - Allow camera rotation by modifying the view matrix.
-     *     `x_angle_` and `y_angle` hold the necessary information and are
-     *     updated by key presses (see `Solar_viewer::keyboard(...)`).
-     *   - Position the camera at distance `dist_factor_` from the planet's center (in units of planet radii).
-     *     This distance should be controlled by keys 8 and 9.
-     *   - When keys `1` to `6` are pressed, the camera should move to look at
-     *     the corresponding celestial body (this functionality is already provided,
-     *     see `Solar_viewer::keyboard(...)`).
-     *   - Pointer `planet_to_look_at_` stores the current body to view.
-     *   - When you are in spaceship mode (member in_ship_), the camera should
-     *     hover slightly behind and above the ship and rotate along with it (so that
-     *     when the ship moves and turns it always remains stationary in view
-     *     while the solar system moves and spins around it).
-     *
-     *  Hint: planet centers are stored in "Planet::pos_".
-     */
 
-    
+    //set some default values
     vec4     eye = vec4(0, 0, 7, 1.0);
     vec4  center = sun_.pos_;
     vec4      up = vec4(0, 1, 0, 0);
     //float radius = sun_.radius_;
     
-    // For now, view the sun from a fixed position...
     if (planet_to_look_at_) {
         center = 
             planet_to_look_at_->pos_;
@@ -439,28 +406,8 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
 
 
 
-    /** \todo Render the star background, the spaceship, and the rest of the celestial bodies.
-     *  For now, everything should be rendered with the color_shader_,
-     *  which expects uniforms "modelview_projection_matrix", "tex" and "grayscale"
-     *  and a single bound texture.
-     *
-     *  For each object, first compute the model matrix
-     *  (similarly to what you did in function update_body_positions()), model-view
-     *  matrix (use already computed _view) and model-view-projection matrix (use
-     *  already computed _projection).
-     *
-     *  Then set up the shader. Make use of the use() function defined in shader.cpp to
-     *  specify the handle of the shader program and set the uniform variables expected by
-     *  the shader.
-     *
-     *  Finally, bind the the texture (such that the sphere would be rendered with given
-     *  texture) and draw the sphere.
-     *
-     *  Hint: See how it is done for the Sun in the code above.
-     */
 
-    vec3 transVec;
-    vec3 transVecEarth;
+
 
     static float earth_animation_time = 0;
     if (timer_active_) earth_animation_time += 0.01f;
@@ -471,7 +418,6 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(earth_.pos_) * mat4::rotate_y(earth_.angle_self_) * mat4::scale(earth_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
-    earth_.pos_ = vec4(transVecEarth, 1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", earth_animation_time, true);
@@ -489,7 +435,6 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix =  mat4::translate(moon_.pos_) * mat4::rotate_y(moon_.angle_self_) * mat4::scale(moon_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
-    moon_.pos_ = vec4(transVec,1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", moon_animation_time, true);
@@ -507,7 +452,6 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(mercury_.pos_) * mat4::rotate_y(mercury_.angle_self_) * mat4::scale(mercury_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
-    mercury_.pos_ = vec4(transVec, 1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", mercury_animation_time, true);
@@ -541,7 +485,6 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(venus_.pos_) * mat4::rotate_y(venus_.angle_self_) * mat4::scale(venus_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
-    venus_.pos_ = vec4(transVec, 1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", venus_animation_time, true);
@@ -559,7 +502,6 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(mars_.pos_) * mat4::rotate_y(mars_.angle_self_) * mat4::scale(mars_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
-    mars_.pos_ = vec4(transVec, 1);
     color_shader_.use();
     color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
     color_shader_.set_uniform("t", mars_animation_time, true);
