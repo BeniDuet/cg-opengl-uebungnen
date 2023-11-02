@@ -362,15 +362,15 @@ void Solar_viewer::paint()
             planet_to_look_at_->pos_;
         center.w = 1;
         
-        eye = mat4::rotate_y(y_angle_) * mat4::rotate_x(x_angle_+90) *
+        eye = mat4::rotate_y(y_angle_) * mat4::rotate_x(x_angle_) *
             vec4(0,0,dist_factor_ * planet_to_look_at_->radius_,0)+center;
-        up = mat4::rotate_y(y_angle_) * mat4::rotate_x(x_angle_ + 90) * vec4(0, 1, 0, 0);
+        up = mat4::rotate_y(y_angle_) * mat4::rotate_x(x_angle_) * vec4(0, 1, 0, 0);
             
     }
     if (in_ship_) {
         //update eye to look down on spaceship
         center = ship_.pos_;
-        eye = center - ship_.direction_*ship_.radius_*30 + vec4(0,0.02f,0,0);
+        eye = center - mat4::rotate_y(y_angle_)*ship_.direction_*ship_.radius_*30 + vec4(0,0.02f,0,0);
 
     }
     mat4 view = mat4::look_at(vec3(eye), vec3(center), vec3(up));
