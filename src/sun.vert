@@ -24,6 +24,12 @@ void main()
     // pass through texture coordinate
     v2f_texcoord = v_texcoord;
 
+    /** \todo (optional) Make your sun surface look like a fluid.
+    *   - compute, where your incoming vertex is on the sphere by converting its position in spherical angles
+    *   - add a new uniform `time` parameter to your shader
+    *   - change the position of the vertex depending on its angles and `time` with a combination of sin and cos
+    *   - experiment with different combinations of amplitude and frequency until you have a nice flow-like effect
+    **/
     gl_Position = modelview_projection_matrix * v_position;
 
 }
