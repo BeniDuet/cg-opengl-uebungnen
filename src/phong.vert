@@ -43,6 +43,6 @@ void main()
 	vec4 position_vp = modelview_matrix*v_position;
 
 	v2f_light = vec3(light_position-position_vp);
-	v2f_view = vec3(position_vp); //Get the direction of the viewer -modelview_matrix*vec4(0,0,0,1)
+	v2f_view = vec3(position_vp); 
 
 }

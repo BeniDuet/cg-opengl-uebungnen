@@ -23,29 +23,24 @@ const float shininess = 8.0;
 const vec3  sunlight = vec3(1.0, 0.941, 0.898);
 
 void main()
-{
-    /**
-    *  Implement the Phong shading model (like in the 1st exercise) by using the passed
-    *  variables and write the resulting color to `color`.
-    *  `tex` should be used as material parameter for ambient, diffuse and specular lighting.
-    * Hints:
-    * - The texture(texture, 2d_position) returns a 4-vector (rgba). You can use
-    * `texture(...).r` to get just the red component or `texture(...).rgb` to get a vec3 color
-    * value
-     */
-    
+{   
     vec3 color = vec3(0.0,0.0,0.0);
 
-    //ambient:
+    //calculate the direciton of the sun
+    vec3 light_dir = normalize(v2f_light);
+    //get the texel of planet texture
     vec3 sampled_tex = vec3(texture(tex,v2f_texcoord));
-
+    
+    //normal phong model
     vec3 ambient = vec3(sampled_tex) * 0.2 * sunlight;
     vec3 diffuse = max(dot(v2f_normal,normalize(v2f_light)),0) * vec3(sampled_tex) * sunlight;
+    float spec = pow(max(0, dot(reflect(-light_dir,v2f_normal),
+        normalize(vec3(0,0,1)))),shininess);
     vec3 specular = dot(v2f_normal,v2f_light) >= 0 
-        ? sunlight * sampled_tex * 
-            max(0, pow(dot(reflect(normalize(v2f_light),v2f_normal),normalize(vec3(0,0,1))),shininess))
+        ? sunlight * sampled_tex * spec
         : vec3(0);
-
+    
+    //add everything together...
     color = ambient + diffuse + specular;
 
     // convert RGB color to YUV color and use only the luminance
