@@ -33,8 +33,20 @@ void main()
     * `texture(...).r` to get just the red component or `texture(...).rgb` to get a vec3 color
     * value
      */
-
+    
     vec3 color = vec3(0.0,0.0,0.0);
+
+    //ambient:
+    vec3 sampled_tex = vec3(texture(tex,v2f_texcoord));
+
+    vec3 ambient = vec3(sampled_tex) * 0.2 * sunlight;
+    vec3 diffuse = max(dot(v2f_normal,normalize(v2f_light)),0) * vec3(sampled_tex) * sunlight;
+    vec3 specular = dot(v2f_normal,v2f_light) >= 0 
+        ? sunlight * sampled_tex * 
+            max(0, pow(dot(reflect(normalize(v2f_light),v2f_normal),normalize(vec3(0,0,1))),shininess))
+        : vec3(0);
+
+    color = ambient + diffuse + specular;
 
     // convert RGB color to YUV color and use only the luminance
     if (greyscale) color = vec3(0.299*color.r+0.587*color.g+0.114*color.b);

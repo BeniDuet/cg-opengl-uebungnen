@@ -383,9 +383,7 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     // convert light into camera coordinates
     light = _view * light;
 
-
-
-
+    
     static float sun_animation_time = 0;
     if (timer_active_) sun_animation_time += 0.01f;
 
@@ -435,11 +433,14 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix =  mat4::translate(moon_.pos_) * mat4::rotate_y(moon_.angle_self_) * mat4::scale(moon_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
-    color_shader_.use();
-    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
-    color_shader_.set_uniform("t", moon_animation_time, true);
-    color_shader_.set_uniform("tex", 0);
-    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    phong_shader_.use();
+    phong_shader_.set_uniform("light_position", light);
+    phong_shader_.set_uniform("normal_matrix", _view*inverse(transpose(mat3(m_matrix))));
+    phong_shader_.set_uniform("modelview_matrix", mv_matrix);
+    phong_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    phong_shader_.set_uniform("t", moon_animation_time, true);
+    phong_shader_.set_uniform("tex", 0);
+    phong_shader_.set_uniform("greyscale", (int)greyscale_);
     moon_.tex_.bind();
     unit_sphere_.draw();
 
@@ -452,11 +453,14 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(mercury_.pos_) * mat4::rotate_y(mercury_.angle_self_) * mat4::scale(mercury_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
-    color_shader_.use();
-    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
-    color_shader_.set_uniform("t", mercury_animation_time, true);
-    color_shader_.set_uniform("tex", 0);
-    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    phong_shader_.use();
+    phong_shader_.set_uniform("light_position", light);
+    phong_shader_.set_uniform("normal_matrix", inverse(transpose(mat3(mv_matrix))));
+    phong_shader_.set_uniform("modelview_matrix", mv_matrix);
+    phong_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    phong_shader_.set_uniform("t", mercury_animation_time, true);
+    phong_shader_.set_uniform("tex", 0);
+    phong_shader_.set_uniform("greyscale", (int)greyscale_);
     mercury_.tex_.bind();
     unit_sphere_.draw();
 
@@ -485,11 +489,14 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(venus_.pos_) * mat4::rotate_y(venus_.angle_self_) * mat4::scale(venus_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
-    color_shader_.use();
-    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
-    color_shader_.set_uniform("t", venus_animation_time, true);
-    color_shader_.set_uniform("tex", 0);
-    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    phong_shader_.use();
+    phong_shader_.set_uniform("light_position", light);
+    phong_shader_.set_uniform("normal_matrix", inverse(transpose(mat3(mv_matrix))));
+    phong_shader_.set_uniform("modelview_matrix", mv_matrix);
+    phong_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    phong_shader_.set_uniform("t", venus_animation_time, true);
+    phong_shader_.set_uniform("tex", 0);
+    phong_shader_.set_uniform("greyscale", (int)greyscale_);
     venus_.tex_.bind();
     unit_sphere_.draw();
 
@@ -502,11 +509,14 @@ void Solar_viewer::draw_scene(mat4& _projection, mat4& _view)
     m_matrix = mat4::translate(mars_.pos_) * mat4::rotate_y(mars_.angle_self_) * mat4::scale(mars_.radius_);
     mv_matrix = _view * m_matrix;
     mvp_matrix = _projection * mv_matrix;
-    color_shader_.use();
-    color_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
-    color_shader_.set_uniform("t", mars_animation_time, true);
-    color_shader_.set_uniform("tex", 0);
-    color_shader_.set_uniform("greyscale", (int)greyscale_);
+    phong_shader_.use();
+    phong_shader_.set_uniform("light_position", light);
+    phong_shader_.set_uniform("normal_matrix", inverse(transpose(mat3(mv_matrix))));
+    phong_shader_.set_uniform("modelview_matrix", mv_matrix);
+    phong_shader_.set_uniform("modelview_projection_matrix", mvp_matrix);
+    phong_shader_.set_uniform("t", mars_animation_time, true);
+    phong_shader_.set_uniform("tex", 0);
+    phong_shader_.set_uniform("greyscale", (int)greyscale_);
     mars_.tex_.bind();
     unit_sphere_.draw();
 
