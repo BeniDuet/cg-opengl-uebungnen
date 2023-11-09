@@ -354,7 +354,7 @@ void Solar_viewer::paint()
 
         billboard_x_angle_ = asin(-bbnorm.y) * (180 / M_PI);
 
-        billboard_y_angle_ = atan2(bbnorm.x, eye.y) * (180 / M_PI);
+        billboard_y_angle_ = atan2(bbnorm.x, bbnorm.z) * (180 / M_PI);
     }
 
     
