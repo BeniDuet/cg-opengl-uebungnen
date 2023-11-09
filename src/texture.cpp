@@ -11,6 +11,7 @@
 #include <iostream>
 #include <cassert>
 #include <algorithm>
+#include <cmath>
 #include "lodepng.h"
 
 //=============================================================================
@@ -100,14 +101,43 @@ bool Texture::createSunBillboardTexture()
     int height = 900;
     img.resize(width*height * 4);
 
+    /** \todo Set up the texture for the sun billboard.
+   *   - Draw an opaque circle with a 150 pixel radius in its middle
+   *   - Outside that circle the texture should become more and more transparent to mimic a nice glow effect
+   *   - Make sure that your texture is fully transparent at its borders to avoid seeing visible edges
+   *   - Experiment with the color and with how fast you change the transparency until the effect satisfies you
+   **/
+
+    int radius = 150;
+
+
+
     for (int col = 0; col < width; ++col) {
         for (int row = 0; row < height; ++row) {
-            img[(row * width + col) * 4 + 0] = 255; // R
-            img[(row * width + col) * 4 + 1] = 255; // G
-            img[(row * width + col) * 4 + 2] = 255; // B
-            img[(row * width + col) * 4 + 3] = 255; // A
+            int x = col - width / 2;
+            int y = row - height / 2;
+            float rsquared = (x*x + y*y);
+
+
+
+            if (rsquared < radius)
+            {
+                img[(row * width + col) * 4 + 0] = 255; //R
+                img[(row * width + col) * 4 + 1] = 255; //G
+                img[(row * width + col) * 4 + 2] = 255; //B
+                img[(row * width + col) * 4 + 3] = 255; //A
+            }
+            else
+            {
+                img[(row * width + col) * 4 + 0] = 255;
+                img[(row * width + col) * 4 + 1] = 0;
+                img[(row * width + col) * 4 + 2] = 0;
+                float gradient =  (radius * radius) / (rsquared) -  (radius * radius) / (450 * 450);
+                img[(row * width + col) * 4 + 3] = std::min<int>(255, std::max<int>(0, 255 * gradient ));
+            }
         }
     }
+
 
     return uploadImage(img, width, height);
 }
